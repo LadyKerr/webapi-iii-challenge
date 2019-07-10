@@ -16,7 +16,7 @@ router.get("/", (req, res) => {
 });
 
 //display users by their ID
-router.get("/:id", validateUserId, (req, res) => {
+router.get("/:id", (req, res) => {
   const { id } = req.params;
 
   Users.getById(id)
@@ -36,7 +36,7 @@ router.get("/:id", validateUserId, (req, res) => {
     });
 });
 
-//show post by specified ID
+//show posts made by specific user ID
 router.get("/:id/posts", validateUserId, (req, res) => {
   const { id } = req.params;
 
@@ -58,12 +58,27 @@ router.get("/:id/posts", validateUserId, (req, res) => {
 });
 
 //create a new user
-router.post("/", (req, res) => {});
+router.post("/", validateUser, (req, res) => {
+  const { name } = req.body;
 
+  Users.insert(req.body)
+    .then(newUser => {
+      res.status(201).json(newUser);
+    })
+    .catch(err => {
+      res
+        .status(500)
+        .json({ message: "There was an error creating the new user." });
+    });
+});
+
+//create a new post by user ID
 router.post("/:id/posts", (req, res) => {});
 
+//delete user
 router.delete("/:id", (req, res) => {});
 
+//update user info
 router.put("/:id", (req, res) => {});
 
 //custom middleware
@@ -71,21 +86,26 @@ router.put("/:id", (req, res) => {});
 function validateUserId(req, res, next) {
   const { id } = req.params;
 
-  Users.getById(id)
-    .then(user => {
-      if (user) {
-        req.user = user;
-        next();
-      } else {
-        res.status(400).json({ message: "Invalid user ID." });
-      }
-    })
-    .catch(err => {
-      res.status(500).json({ message: "error retrieving that user." });
-    });
+  Users.getById(id).then(user => {
+    if (user) {
+      req.user = user;
+      next();
+    } else {
+      res.status(400).json({ message: "Invalid user ID." });
+    }
+  });
+  next();
 }
 
-function validateUser(req, res, next) {}
+function validateUser(req, res, next) {
+  if (!req.body) {
+    res.status(400).json({ message: "Missing user data." });
+  } else if (!req.body.name) {
+    res.status(400).json({ message: "Missing required name field." });
+  } else {
+    next();
+  }
+}
 
 function validatePost(req, res, next) {}
 
