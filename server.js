@@ -6,8 +6,10 @@ const server = express();
 
 //custom middleware
 function logger(req, res, next) {
-  const timestamp = Date.now();
-  console.log(`${req.method} to ${req.baseUrl} at ${timestamp}`);
+  const timestamp = new Date().toString();
+  console.log(
+    `A ${req.method} request was made to ${req.path} at ${timestamp}`
+  );
 
   next();
 }
