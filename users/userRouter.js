@@ -71,16 +71,17 @@ router.post("/", validateUser, (req, res) => {
 });
 
 //create a new post by user ID
-router.post("/:id/posts", validateUserId, validatePost, (req, res) => {
-  let newUserPost = req.body;
+router.post("/:id/posts", validatePost, (req, res) => {
+  let newPost = req.body;
   const { id } = req.params;
-  newUserPost.id = id;
+  newPost.user_id = id;
 
-  Users.insert(newUserPost)
+  Users.insert(newPost)
     .then(newPost => {
       res.status(201).json(newPost);
     })
     .catch(err => {
+      console.log(err);
       res
         .status(500)
         .json({ message: "There was an error adding the user's post." });
