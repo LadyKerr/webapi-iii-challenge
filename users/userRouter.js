@@ -107,7 +107,26 @@ router.delete("/:id", (req, res) => {
 });
 
 //update user info
-router.put("/:id", (req, res) => {});
+router.put("/:id", validateUser, (req, res) => {
+  const id = req.params.id;
+  const changes = req.body;
+
+  Users.update(id, changes)
+    .then(updated => {
+      if (updated) {
+        res.status(200).json(updated);
+      } else {
+        res
+          .status(404)
+          .json({ message: "The user with that id doesnt exist." });
+      }
+    })
+    .catch(err => {
+      res
+        .status(500)
+        .json({ message: "There was an error updating the user." });
+    });
+});
 
 //custom middlewares
 
