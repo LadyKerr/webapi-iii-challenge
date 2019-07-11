@@ -19,7 +19,8 @@ function logger(req, res, next) {
 server.use(logger);
 server.use(express.json());
 
-server.use("/api/users", userRouter, PostRouter);
+server.use("/api/users", userRouter);
+server.use("/api/posts", PostRouter);
 
 server.get("/", (req, res) => {
   res.send(`<h2>Let's write some middleware!</h2>`);
