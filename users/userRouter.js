@@ -59,8 +59,6 @@ router.get("/:id/posts", validateUserId, (req, res) => {
 
 //create a new user
 router.post("/", validateUser, (req, res) => {
-  const { name } = req.body;
-
   Users.insert(req.body)
     .then(newUser => {
       res.status(201).json(newUser);
@@ -73,15 +71,45 @@ router.post("/", validateUser, (req, res) => {
 });
 
 //create a new post by user ID
-router.post("/:id/posts", (req, res) => {});
+router.post("/:id/posts", validateUserId, validatePost, (req, res) => {
+  let newUserPost = req.body;
+  const { id } = req.params;
+  newUserPost.id = id;
+
+  Users.insert(newUserPost)
+    .then(newPost => {
+      res.status(201).json(newPost);
+    })
+    .catch(err => {
+      res
+        .status(500)
+        .json({ message: "There was an error adding the user's post." });
+    });
+});
 
 //delete user
-router.delete("/:id", (req, res) => {});
+router.delete("/:id", (req, res) => {
+  const { id } = req.params;
+
+  Users.remove(id)
+    .then(deleted => {
+      if (deleted) {
+        res.status(200).json(deleted);
+      } else {
+        res.status(404).json({ message: "That user ID does not exist." });
+      }
+    })
+    .catch(err => {
+      res
+        .status(500)
+        .json({ message: "There was an error removing that user." });
+    });
+});
 
 //update user info
 router.put("/:id", (req, res) => {});
 
-//custom middleware
+//custom middlewares
 
 function validateUserId(req, res, next) {
   const { id } = req.params;
@@ -107,6 +135,14 @@ function validateUser(req, res, next) {
   }
 }
 
-function validatePost(req, res, next) {}
+function validatePost(req, res, next) {
+  if (!req.body) {
+    res.status(400).json({ message: "Missing post data." });
+  } else if (!req.body.text) {
+    res.status(400).json({ message: "Missing required text field." });
+  } else {
+    next();
+  }
+}
 
 module.exports = router;

@@ -8,7 +8,7 @@ const server = express();
 function logger(req, res, next) {
   const timestamp = new Date().toString();
   console.log(
-    `A ${req.method} request was made to ${req.path} at ${timestamp}`
+    `A ${req.method} request was made to ${req.path} on ${timestamp}`
   );
 
   next();
